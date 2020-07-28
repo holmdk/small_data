@@ -1,19 +1,44 @@
 import torch.nn as nn
 import torch
 
+from torchvision.models.resnet import ResNet, BasicBlock
+
+class LogisticRegression(nn.Module):
+    def __init__(self):
+        super(LogisticRegression, self).__init__()
+        self.linear = torch.nn.Linear(784, 10)
+
+    def forward(self, x):
+        outputs = self.linear(x)
+        return outputs
+
 
 class MLP(nn.Module):
-    def __init__(self):
+    def __init__(self, dropout=False):
         super(MLP, self).__init__()
-        self.layers = nn.Sequential(
-            nn.Linear(784, 2048),
-            nn.ReLU(),
-            nn.Linear(2048, 2048),
-            nn.ReLU(),
-            nn.Linear(2048, 2048),
-            nn.ReLU(),
-            nn.Linear(2048, 10)
-        )
+        if dropout:
+            self.layers = nn.Sequential(
+                nn.Linear(784, 2048),
+                nn.Dropout(),
+                nn.ReLU(),
+                nn.Linear(2048, 2048),
+                nn.Dropout(),
+                nn.ReLU(),
+                nn.Linear(2048, 2048),
+                nn.Dropout(),
+                nn.ReLU(),
+                nn.Linear(2048, 10)
+            )
+        else:
+            self.layers = nn.Sequential(
+                nn.Linear(784, 2048),
+                nn.ReLU(),
+                nn.Linear(2048, 2048),
+                nn.ReLU(),
+                nn.Linear(2048, 2048),
+                nn.ReLU(),
+                nn.Linear(2048, 10)
+            )
 
         # self.layers = nn.Sequential(
         #     nn.Linear(784, 100),
@@ -97,3 +122,11 @@ class ModelWithTemperature(nn.Module):
         print('After temperature - NLL: %.3f' % (after_temperature_nll))
 
         return self
+
+class MnistResNet(ResNet):
+    def __init__(self):
+        super(MnistResNet, self).__init__(BasicBlock, [2, 2, 2, 2], num_classes=10)
+        self.conv1 = torch.nn.Conv2d(1, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+
+    def forward(self, x):
+        return super(MnistResNet, self).forward(x)

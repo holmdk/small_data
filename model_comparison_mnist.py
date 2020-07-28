@@ -6,9 +6,11 @@ import numpy as np
 import pandas as pd
 import torch.nn.functional as F
 from torchvision import datasets, transforms
+# from torchvision.models import ResNet
+from models import MLP, ModelWithTemperature, MnistResNet, LogisticRegression
 
-from models import MLP, ModelWithTemperature
 
+from torch.autograd import Variable
 #
 # MNIST consists of 60k training and 10k test examples from
 # 10 classes (LeCun, 1998). We train MLPs of various depth
@@ -41,7 +43,8 @@ from models import MLP, ModelWithTemperature
 
 #################
 " PARAMETERS "
-model_name = 'MLP'
+model_name = 'ResNet'
+
 
 include_temperature_scaling = True
 BATCH_SIZE = 256
@@ -113,7 +116,14 @@ for seed in SEEDS:
 
         " MODEL SETTINGS "
 
-        model = MLP().to(device)
+        if model_name == 'MLP':
+            model = MLP().to(device)
+        elif model_name == 'ResNet':
+            # model = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=True).to(device)
+            model = MnistResNet().to(device)
+        elif model_name == 'logistic':
+            model = LogisticRegression().to(device)
+
         if include_temperature_scaling:
             model = ModelWithTemperature(model, valid_loader)
 
@@ -143,6 +153,8 @@ for seed in SEEDS:
                 model.set_temperature()
 
             for i, (images, labels) in enumerate(train_loader):
+                # if model_name == 'ResNet':
+                #     images = Variable(images.resize_(BATCH_SIZE, 1, 32, 32))
                 optimizer.zero_grad()
 
                 outputs = model(images.to(device))
@@ -164,6 +176,8 @@ for seed in SEEDS:
 
             with torch.no_grad():
                 for i, (images, labels) in enumerate(test_loader):
+                    # if model_name == 'ResNet':
+                    #     images = Variable(images.resize_(BATCH_SIZE, 1, 32, 32))
                     outputs = model(images.to(device))
                     loss = loss_fn(outputs, labels.to(device))
 
