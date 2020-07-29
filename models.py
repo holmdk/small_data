@@ -9,6 +9,7 @@ class LogisticRegression(nn.Module):
         self.linear = torch.nn.Linear(784, 10)
 
     def forward(self, x):
+        x = x.view(x.size(0), -1)
         outputs = self.linear(x)
         return outputs
 

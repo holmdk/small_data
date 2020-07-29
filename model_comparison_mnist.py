@@ -43,7 +43,7 @@ from torch.autograd import Variable
 
 #################
 " PARAMETERS "
-model_name = 'ResNet'
+model_name = 'MLP'
 
 
 include_temperature_scaling = True
@@ -117,7 +117,7 @@ for seed in SEEDS:
         " MODEL SETTINGS "
 
         if model_name == 'MLP':
-            model = MLP().to(device)
+            model = MLP(dropout=True).to(device)
         elif model_name == 'ResNet':
             # model = torch.hub.load('pytorch/vision:v0.6.0', 'resnet18', pretrained=True).to(device)
             model = MnistResNet().to(device)
